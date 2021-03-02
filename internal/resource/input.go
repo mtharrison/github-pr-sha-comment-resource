@@ -5,15 +5,13 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"regexp"
-	"strconv"
 	"strings"
 )
 
 // Input is provided to this resource via STDIN
 type Input struct {
-	Source  *Source  `json:"source"`
-	Version *Version `json:"version"`
+	Source *Source `json:"source"`
+	Params *Params `json:"params"`
 }
 
 // Validate checks if the input is sound
@@ -31,30 +29,13 @@ func (i *Input) Validate(requireVersion bool) error {
 		return errors.New("source.access_token cannot be empty")
 	}
 
-	if i.Version == nil && requireVersion {
-		return errors.New("version cannot be empty")
-	}
-
-	if i.Source.Regex != "" {
-		_, err := regexp.Compile(i.Source.Regex)
-		if err != nil {
-			return errors.New("source.regex not a valid regex")
-		}
-	}
-
-	if i.Version != nil {
-		if i.Version.CommentID == "" || i.Version.PrNumber == "" {
-			return errors.New("if set, version must include comment and pr")
+	if i.Params != nil {
+		if i.Params.Comment == "" {
+			return errors.New("must include comment")
 		}
 
-		_, err := strconv.ParseInt(i.Version.CommentID, 10, 64)
-		if err != nil {
-			return errors.New("version.comment not parsable as i64")
-		}
-
-		_, err = strconv.Atoi(i.Version.PrNumber)
-		if err != nil {
-			return errors.New("version.pr not parsable as int")
+		if i.Params.Dir == "" {
+			return errors.New("must include dir")
 		}
 	}
 
@@ -66,7 +47,6 @@ type Source struct {
 	RepositoryString string `json:"repository"`
 	AccessToken      string `json:"access_token"`
 	V3Endpoint       string `json:"v3_endpoint"`
-	Regex            string `json:"regex"`
 }
 
 // Owner returns the repo owner
@@ -79,10 +59,10 @@ func (s *Source) Repo() string {
 	return strings.Split(s.RepositoryString, "/")[1]
 }
 
-// Version represents a single version of the resource
-type Version struct {
-	PrNumber  string `json:"pr"`
-	CommentID string `json:"comment"`
+// Params represents a the params in a put operation
+type Params struct {
+	Dir     string `json:"dir"`
+	Comment string `json:"comment"`
 }
 
 // GetInput takes a reader and constructs an Input

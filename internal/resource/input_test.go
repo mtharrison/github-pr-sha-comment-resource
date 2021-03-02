@@ -13,11 +13,10 @@ func getInput() Input {
 			RepositoryString: "golang/go",
 			AccessToken:      "abc",
 			V3Endpoint:       "http://github.com/api/v3",
-			Regex:            "do something",
 		},
-		Version: &Version{
-			PrNumber:  "123",
-			CommentID: "456",
+		Params: &Params{
+			Dir:     "123",
+			Comment: "456",
 		},
 	}
 }
@@ -54,61 +53,18 @@ func TestInputValidate(t *testing.T) {
 	}
 
 	i = getInput()
-	i.Version = nil
-	err = i.Validate(false)
-	if err != nil {
-		t.Error("version should be optional when requireVersion is false")
-	}
-
-	i = getInput()
-	i.Version = nil
-	err = i.Validate(true)
-	if err.Error() != "version cannot be empty" {
-		t.Error("version should be required when requireVersion is true")
-	}
-
-	i = getInput()
-	i.Source.Regex = "(.*)"
-	err = i.Validate(true)
-	if err != nil {
-		t.Error("a valid regex should be accepted")
-	}
-
-	i = getInput()
-	i.Source.Regex = "((:"
-	err = i.Validate(true)
-	if err.Error() != "source.regex not a valid regex" {
-		t.Error("invalid regex should not be accepted")
-	}
-
-	i = getInput()
-	i.Version.CommentID = ""
+	i.Params.Dir = ""
 	err = i.Validate(true)
 	if err.Error() != "if set, version must include comment and pr" {
 		t.Error("should not allow comment to be omitted")
 	}
 
 	i = getInput()
-	i.Version.PrNumber = ""
+	i.Params.Comment = ""
 	err = i.Validate(true)
 	if err.Error() != "if set, version must include comment and pr" {
 		t.Error("should not allow pr to be omitted")
 	}
-
-	i = getInput()
-	i.Version.CommentID = "xxx"
-	err = i.Validate(true)
-	if err.Error() != "version.comment not parsable as i64" {
-		t.Error("comment id should be int64")
-	}
-
-	i = getInput()
-	i.Version.PrNumber = "yyy"
-	err = i.Validate(true)
-	if err.Error() != "version.pr not parsable as int" {
-		t.Error("pr id should be int")
-	}
-
 }
 
 func TestSourceOwner(t *testing.T) {
@@ -122,7 +78,7 @@ func TestSourceRepo(t *testing.T) {
 }
 
 func TestGetInput(t *testing.T) {
-	inputString := "{\"source\":{\"repository\":\"golang/go\",\"access_token\":\"abc\",\"v3_endpoint\":\"https://github.com/api/v3\",\"regex\":\"do something\"},\"version\":{\"pr\":\"111\",\"comment\":\"222\"}}"
+	inputString := "{\"source\":{\"repository\":\"golang/go\",\"access_token\":\"abc\",\"v3_endpoint\":\"https://github.com/api/v3\",\"regex\":\"do something\"},\"params\":{\"dir\":\"111\",\"comment\":\"222\"}}"
 	reader := strings.NewReader(inputString)
 	input, err := GetInput(reader, true)
 
@@ -133,11 +89,10 @@ func TestGetInput(t *testing.T) {
 			RepositoryString: "golang/go",
 			AccessToken:      "abc",
 			V3Endpoint:       "https://github.com/api/v3",
-			Regex:            "do something",
 		},
-		Version: &Version{
-			PrNumber:  "111",
-			CommentID: "222",
+		Params: &Params{
+			Dir:     "111",
+			Comment: "222",
 		},
 	}
 

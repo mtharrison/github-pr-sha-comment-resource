@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/mtharrison/github-pr-comment-resource/internal/resource"
+	"github.com/mtharrison/github-pr-sha-comment-resource/internal/resource"
 )
 
 func main() {

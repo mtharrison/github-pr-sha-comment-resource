@@ -1,8 +1,12 @@
 package resource
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/google/go-github/v33/github"
 )
 
 func GetShaFromDir(dir string) (string, error) {
@@ -20,7 +24,14 @@ func GetShaFromDir(dir string) (string, error) {
 	return h.String(), nil
 }
 
-func GetPrFromSha(sha string) (string, error) {
+func GetPrFromSha(source *Source, sha string) (string, error) {
+
+	client := github.NewClient(nil)
+	ctx := context.Background()
+
+	pulls, res, err := client.PullRequests.ListPullRequestsWithCommit(ctx, source.Owner(), source.Repo(), sha, nil)
+
+	fmt.Println(pulls, res, err)
 
 	return "", nil
 }

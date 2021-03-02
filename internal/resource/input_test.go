@@ -55,14 +55,14 @@ func TestInputValidate(t *testing.T) {
 	i = getInput()
 	i.Params.Dir = ""
 	err = i.Validate(true)
-	if err.Error() != "if set, version must include comment and pr" {
-		t.Error("should not allow comment to be omitted")
+	if err.Error() != "must include dir" {
+		t.Error("should not allow Dir to be omitted")
 	}
 
 	i = getInput()
 	i.Params.Comment = ""
 	err = i.Validate(true)
-	if err.Error() != "if set, version must include comment and pr" {
+	if err.Error() != "must include comment" {
 		t.Error("should not allow pr to be omitted")
 	}
 }

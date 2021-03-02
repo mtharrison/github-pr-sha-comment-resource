@@ -2,11 +2,12 @@ package resource
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/google/go-github/v33/github"
+	"golang.org/x/oauth2"
 )
 
 func GetShaFromDir(dir string) (string, error) {
@@ -24,16 +25,21 @@ func GetShaFromDir(dir string) (string, error) {
 	return h.String(), nil
 }
 
-func GetPrFromSha(source *Source, sha string) (string, error) {
+func GetPrNumberFromSha(input Input, sha string) (int, error) {
 
-	client := github.NewClient(nil)
+	client, err := githubClient(input.Source.AccessToken, input.Source.V3Endpoint)
 	ctx := context.Background()
 
-	pulls, res, err := client.PullRequests.ListPullRequestsWithCommit(ctx, source.Owner(), source.Repo(), sha, nil)
+	pulls, _, err := client.PullRequests.ListPullRequestsWithCommit(ctx, input.Source.Owner(), input.Source.Repo(), sha, nil)
+	if err != nil {
+		return -1, err
+	}
 
-	fmt.Println(pulls, res, err)
+	if len(pulls) < 1 {
+		return -1, errors.New("No pulls found for SHA")
+	}
 
-	return "", nil
+	return *pulls[0].Number, nil
 }
 
 // GithubVersions retrieves all matching versions for the given input
@@ -150,21 +156,21 @@ func GetPrFromSha(source *Source, sha string) (string, error) {
 // 	return result, nil
 // }
 
-// func githubClient(token, endpoint string) (*github.Client, error) {
-// 	ctx := context.Background()
-// 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-// 	tc := oauth2.NewClient(ctx, ts)
+func githubClient(token, endpoint string) (*github.Client, error) {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+	tc := oauth2.NewClient(ctx, ts)
 
-// 	if endpoint == "" {
-// 		return github.NewClient(tc), nil
-// 	}
+	if endpoint == "" {
+		return github.NewClient(tc), nil
+	}
 
-// 	client, err := github.NewEnterpriseClient(endpoint, endpoint, tc)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return client, nil
-// }
+	client, err := github.NewEnterpriseClient(endpoint, endpoint, tc)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
 
 // func filterComment(input Input, comment *github.IssueComment) (bool, error) {
 // 	// filter older comments

@@ -20,6 +20,11 @@ func GetShaFromDir(dir string) (string, error) {
 	return h.String(), nil
 }
 
+func GetPrFromSha(sha string) (string, error) {
+
+	return "", nil
+}
+
 // GithubVersions retrieves all matching versions for the given input
 // func GithubVersions(input Input) ([]Version, error) {
 // 	result := make([]Version, 0)

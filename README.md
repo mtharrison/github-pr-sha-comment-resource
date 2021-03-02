@@ -1,64 +1,44 @@
-# github-pr-comment-resource
+# github-pr-sha-comment-resource
 
-![master](https://github.com/mtharrison/github-pr-comment-resource/workflows/Master/badge.svg?branch=master) ![Release](https://github.com/mtharrison/github-pr-comment-resource/workflows/Release/badge.svg) ![GitHub release](https://img.shields.io/github/v/release/mtharrison/github-pr-comment-resource) ![report](https://goreportcard.com/badge/github.com/mtharrison/github-pr-comment-resource)
+![master](https://github.com/mtharrison/github-pr-sha-comment-resource/workflows/Master/badge.svg?branch=master) ![Release](https://github.com/mtharrison/github-pr-sha-comment-resource/workflows/Release/badge.svg) ![GitHub release](https://img.shields.io/github/v/release/mtharrison/github-pr-sha-comment-resource) ![report](https://goreportcard.com/badge/github.com/mtharrison/github-pr-sha-comment-resource)
 
-A resource type for [Concourse CI](https://concourse-ci.org/) to trigger builds from Github PR comments. Also allows parameters to be provided in comments.
+A resource type for [Concourse CI](https://concourse-ci.org/) to comment on PRs based on the HEAD sha of a given git repo (useful for linking PRs back to merges)
  
-![image](https://cldup.com/beeBL0NNQ3.png)
- 
- ---
+---
  
 ## Usage
  
- To use register the resource type using the public [Docker image](https://hub.docker.com/repository/docker/mtharrison/github-pr-comment-resource) `mtharrison/github-pr-comment-resource`.
+ To use register the resource type using the public [Docker image](https://hub.docker.com/repository/docker/mtharrison/github-pr-sha-comment-resource) `mtharrison/github-pr-sha-comment-resource`.
 
  ```yaml
  resource_types:
-  - name: github-pr-comment-resource
+  - name: github-pr-sha-comment-resource
     type: docker-image
     source:
-      repository: mtharrison/github-pr-comment-resource
+      repository: mtharrison/github-pr-sha-comment-resource
       tag: v0.2.0
  ```
  Then create a new resource using this resource type. You'll need to provide the `repository`, `access_token`, optionally a `v3_endpoint` if you're using Github Enterprise, otherwise this will default to the public Github API.
  
- Optionally you can provide a `regex` (valid [Go regex](https://golang.org/pkg/regexp/) only). Comments that match this regex only will become new versions. If the regex contains capture groups they will be provided by the resource too.
-
  ```yaml
 resources:
-  - name: deployment-trigger
-    type: github-pr-comment-resource
+  - name: github-pr-comment
+    type: github-pr-sha-comment
     icon: github
     source:
       repository: golang/go
       access_token: '[...]'
       v3_endpoint: '[...]'
-      regex: '^deploy ([a-zA-Z0-9_.-]+) to ([a-zA-Z0-9_.-]+) please$'
  ```
- Finally you can use the resource as an input/trigger to any jobs.
+ Finally you can use the resource to post a comment to a PR
  ```yaml
 jobs:
-  - name: deployment-test
+  - name: master-job-example
     plan:
-      - get: deployment-trigger
+      - get: some-repo
         trigger: true
-      - task: echo
-        config:
-          image_resource:
-            type: registry-image
-            source:
-              repository: alpine
-          inputs:
-            - name: deployment-trigger
-          platform: linux
-          run:
-            path: /bin/sh
-            args:
-              - '-c'
-              - |
-                apk add jq &> /dev/null
-                cat deployment-trigger/comment.json | jq
+      - put: github-pr-comment
+        params:
+            dir: master-job-example
+            comment: "Triggered master build - [click to open pipeline](\${ATC_EXTERNAL_URL}/builds/\${BUILD_ID})"
  ```
- In the resource directory a `comment.json` file will be written containing the resource data. See screenshot below:
- 
- ![screenshot](https://cldup.com/ZyLNgJX85r.png)

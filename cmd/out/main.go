@@ -4,17 +4,23 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/mtharrison/github-pr-sha-comment-resource/internal/resource"
 )
 
 func main() {
+
+	if len(os.Args) < 2 {
+		log.Fatalf("missing arguments")
+	}
+
 	input, err := resource.GetInput(os.Stdin, true)
 	if err != nil {
 		log.Fatal("Could not read input: ", err)
 	}
 
-	sha, err := resource.GetShaFromDir(input.Params.Dir)
+	sha, err := resource.GetShaFromDir(filepath.Join(os.Args[1], input.Params.Dir))
 	if err != nil {
 		log.Fatal("Could not get sha from dir: ", err)
 	}

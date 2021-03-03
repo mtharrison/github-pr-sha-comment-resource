@@ -1,6 +1,6 @@
 # github-pr-sha-comment-resource
 
-![master](https://github.com/mtharrison/github-pr-sha-comment-resource/workflows/Master/badge.svg?branch=master) ![Release](https://github.com/mtharrison/github-pr-sha-comment-resource/workflows/Release/badge.svg) ![GitHub release](https://img.shields.io/github/v/release/mtharrison/github-pr-sha-comment-resource) ![report](https://goreportcard.com/badge/github.com/mtharrison/github-pr-sha-comment-resource)
+![master](https://github.com/mtharrison/github-pr-sha-comment-resource/workflows/Master/badge.svg?branch=master) [![release](https://github.com/mtharrison/github-pr-sha-comment-resource/actions/workflows/release.yml/badge.svg)](https://github.com/mtharrison/github-pr-sha-comment-resource/actions/workflows/release.yml) ![GitHub release](https://img.shields.io/github/v/release/mtharrison/github-pr-sha-comment-resource) ![report](https://goreportcard.com/badge/github.com/mtharrison/github-pr-sha-comment-resource)
 
 A resource type for [Concourse CI](https://concourse-ci.org/) to comment on PRs based on the HEAD sha of a given git repo (useful for linking PRs back to merges)
  
